@@ -1,23 +1,33 @@
 import React, { Component } from "react";
-import {
-  Container,
-  Content,
-  List,
-  Text,
-  
-} from "native-base";
+import { Container, Content, List, Text, View } from "native-base";
 
 import getArticles from "../../service/News";
-import { Alert,ActivityIndicator } from "react-native";
+import { Alert, ActivityIndicator } from "react-native";
 import DataItem from "../../component/DataItem";
-
+import Model from "../../component/model";
 export default class Tab1 extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
       data: null,
+      setModelVisible: false,
+      modalArticalData: {},
     };
+  }
+
+  handleItemDataOnPress = (articleData) => {
+    this.setState({
+      setModalVisible: true,
+      modalArticleData: articleData
+    });
+  }
+
+  handleModalClose = () => {
+    this.setState({
+      setModalVisible: false,
+      modalArticleData: {}
+    });
   }
   componentDidMount() {
     getArticles().then((data) => {
@@ -32,8 +42,9 @@ export default class Tab1 extends Component {
   }
 
   render() {
-    const view = this.state.loading ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+    let view = this.state.isLoading ? (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator animating={this.state.isLoading} color="#00f0ff" />
         <Text style={{marginTop: 10}} children="Please Wait.." />
       </View>
@@ -41,13 +52,22 @@ export default class Tab1 extends Component {
       <List
         dataArray={this.state.data}
         renderRow={(item) => {
-          return <DataItem data={item} />;
-        }}
-      />
-    );
+            return (
+              <DataItem onPress={this.handleItemDataOnPress} data={item} />
+            )
+        }} />
+    )
+
     return (
       <Container>
-        <Content>{view}</Content>
+        <Content>
+          {view}
+        </Content>
+        <Model 
+          showModal={this.state.setModalVisible}
+          articleData={this.state.modalArticleData}
+          onClose={this.handleModalClose}
+        />
       </Container>
     );
   }
